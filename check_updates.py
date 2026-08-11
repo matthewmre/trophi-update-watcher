@@ -57,17 +57,18 @@ def send_email(subject, body):
     smtp_port = int(os.environ.get("SMTP_PORT", "587"))
     smtp_user = os.environ["SMTP_USER"]
     smtp_pass = os.environ["SMTP_PASS"]
-    to_email = os.environ["TO_EMAIL"]
+    # Supports one address or several comma-separated addresses in TO_EMAIL
+    to_emails = [addr.strip() for addr in os.environ["TO_EMAIL"].split(",") if addr.strip()]
 
     msg = MIMEText(body)
     msg["Subject"] = subject
     msg["From"] = smtp_user
-    msg["To"] = to_email
+    msg["To"] = ", ".join(to_emails)
 
     with smtplib.SMTP(smtp_server, smtp_port) as server:
         server.starttls()
         server.login(smtp_user, smtp_pass)
-        server.sendmail(smtp_user, [to_email], msg.as_string())
+        server.sendmail(smtp_user, to_emails, msg.as_string())
 
 
 def main():
